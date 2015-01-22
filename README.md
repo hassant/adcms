@@ -38,3 +38,15 @@ The content of this repository is licensed under the Apache License, Version 2.0
 ##Issues / Feedback
 You may report issues or submit feature requests in the [Issues](https://github.com/persistentsystems/adcms/issues) section of this repository. 
 For questions or feedback about the solution, please contact [adcms@persistent.com](mailto:adcms@persistent.com).
+
+##FAQs
+
+1.	I don't want to migrate all the resources from my source data center. Is there a way to select resources for migration?
+
+    At this time, the solution does not provide a way to choose which resources to export or import. A workaround to achieve this is to:
+
+	-	Export the source data center to the metadata JSON file
+	-	Modify it to remove resources that should not be copied to the destination
+	-	Use the edited file during the Import process
+
+	The metadata file contains all VM dependent resources like VMs/affinity groups/cloud services/storage accounts/virtual networks. If your source data center contains extra resources, you can choose not to import them by removing them from the exported JSON file. While editing the JSON file, you need to be careful that you don’t miss the dependent resources of the VMs you want to migrate. E.g. If the virtual machine is present within affinity group or in a virtual network, all the dependent resources i.e. cloud service in which the VM is located, storage account where the blobs are stored, affinity group and virtual network if applicable should be present in the metadata file.
