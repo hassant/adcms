@@ -50,3 +50,7 @@ For questions or feedback about the solution, please contact [adcms@persistent.c
 	-	Use the edited file during the Import process
 
 	The metadata file contains all VM dependent resources like VMs/affinity groups/cloud services/storage accounts/virtual networks. If your source data center contains extra resources, you can choose not to import them by removing them from the exported JSON file. While editing the JSON file, you need to be careful that you don’t miss the dependent resources of the VMs you want to migrate. E.g. If the virtual machine is present within affinity group or in a virtual network, all the dependent resources i.e. cloud service in which the VM is located, storage account where the blobs are stored, affinity group and virtual network if applicable should be present in the metadata file.
+
+2. Will this solution work with Government Cloud?
+
+    No. This solution was tested with data centers in Public Azure.
