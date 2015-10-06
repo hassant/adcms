@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using Microsoft.WindowsAzure.Management.Storage.Models;
+using System.Collections.Generic;
 
 namespace Azure.DataCenterMigration.Models
 {
@@ -33,6 +33,11 @@ namespace Azure.DataCenterMigration.Models
         /// Status of Storage Account import 
         /// </summary>
         public bool IsImported { get; set; }
+
+        /// <summary>
+        /// details of storage container
+        /// </summary>
+        public List<Container> Containers { get; set; }
 
         #endregion
     }

@@ -1,4 +1,5 @@
-﻿/*******************************************************************************
+﻿using Hyak.Common;
+/*******************************************************************************
  * Copyright 2014 Persistent Systems Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using Microsoft.WindowsAzure;
+//using Microsoft.WindowsAzure;
+using Microsoft.Azure;
 using Microsoft.WindowsAzure.Management;
 using Microsoft.WindowsAzure.Management.Models;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Azure.DataCenterMigration
 {
@@ -63,7 +62,7 @@ namespace Azure.DataCenterMigration
                     if (ignoreResourceNotFoundEx && (ex.GetType() == typeof(CloudException)))
                     {    
                         //Return if error code is Resource Not Found
-                        if (string.Compare(((CloudException)ex).ErrorCode, Constants.ResourceNotFound, StringComparison.CurrentCultureIgnoreCase) == 0)
+                        if (string.Compare(((CloudException)ex).Error.ToString(), Constants.ResourceNotFound, StringComparison.CurrentCultureIgnoreCase) == 0)
                         {                            
                             return default(T);
                         }

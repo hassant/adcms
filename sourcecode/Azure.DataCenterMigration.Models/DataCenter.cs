@@ -41,7 +41,6 @@ namespace Azure.DataCenterMigration.Models
         /// </summary>
         public bool IsImported { get; set; }
 
-
         /// <summary>
         /// Read-Write property for AffinityGroup associated with Datacenter
         /// </summary>

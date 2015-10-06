@@ -40,6 +40,5 @@ namespace Azure.DataCenterMigration.Models
         public bool IsImported { get; set; }
 
         #endregion
-
     }
 }

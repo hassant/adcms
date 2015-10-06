@@ -19,11 +19,11 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension" xmlns:adx="http://schemas.add-in-express.com/wixdesigner" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" xmlns:sql="http://schemas.microsoft.com/wix/SqlExtension" xmlns:DataSource="http://schemas.appsecinc.com/wix/DataSourceExtension">
 
   <!--Variables -->
-  <?define appName="Azure Data Center Migration 1.0" ?>
+  <?define appName="Azure Data Center Migration 2.0" ?>
   <?define Root = "..\.."?>
   <?define SourceCode = "..\..\SourceCode"?>
 
-  <Product Id="*" Name="$(var.appName)" Language="1033" Version="1.0.0.0" Manufacturer="Persistent Systems Ltd." UpgradeCode="ca471108-8763-4e3b-bf96-310470d940a5" Codepage="1252">
+  <Product Id="*" Name="$(var.appName)" Language="1033" Version="2.0.0.0" Manufacturer="Persistent Systems Ltd." UpgradeCode="ca471108-8763-4e3b-bf96-310470d940a5" Codepage="1252">
     <Package Id="*" Platform="x64" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" SummaryCodepage="1252"/>
     <Binary Id="InstallUtil" SourceFile="Resources\Binary\InstallUtil" />
     <Binary Id="ADXDPCADLL" SourceFile="Resources\Binary\adxdpca64.dll" />
@@ -316,23 +316,24 @@
         </File>
         <!--Config file references-->
         <!--Azure.DataCenterMigration.App.exe.config-->
-        <File Id="Azure.DataCenterMigration.App.exe.config" Source="$(var.Azure.DataCenterMigration.App.TargetDir)"  >
-        </File>
+        <File Id="Azure.DataCenterMigration.App.exe.config" Source="$(var.Azure.DataCenterMigration.App.TargetDir)"></File>
         <File Id="Azure.DataCenterMigration.DatabaseLogSetup.exe" Source="$(var.Azure.DataCenterMigration.DatabaseLogSetup.TargetDir)"></File>
         <File Id="Azure.DataCenterMigration.DatabaseLogSetup.exe.config"  Source="$(var.Azure.DataCenterMigration.DatabaseLogSetup.TargetDir)"></File>
         <File Id="EntityFramework.dll" Source="$(var.Azure.DataCenterMigration.DatabaseLogSetup.TargetDir)"></File>
         <File Id="EntityFramework.SqlServer.dll" Source="$(var.Azure.DataCenterMigration.DatabaseLogSetup.TargetDir)"></File>
         <!--Azure.DataCenterMigration.dll-->
         <File Id="Azure.DataCenterMigration.dll" Source="$(var.Azure.DataCenterMigration.TargetPath)" ></File>
+        <!--Hyak.Common.dll-->
+        <File Id="Hyak.Common.dll" Source="$(var.Azure.DataCenterMigration.TargetDir)\Hyak.Common.dll"></File>
         <!--Azure.DataCenterMigration.Models.dll-->
         <File Id="Azure.DataCenterMigration.Models.dll" Source="$(var.Azure.DataCenterMigration.Models.TargetPath)" ></File>
         <!--NuGet Packages and libraries-->
         <!--Microsoft.Threading.Tasks.dll-->
         <File Id="Microsoft.Threading.Tasks.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)"></File>
         <!--Microsoft.WindowsAzure.Common.dll-->
-        <File Id="Microsoft.WindowsAzure.Common.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)"></File>
+        <File Id="Microsoft.Azure.Common.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)"></File>  
         <!--Microsoft.WindowsAzure.Common.NetFramework.dll-->
-        <File Id="Microsoft.WindowsAzure.Common.NetFramework.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)" ></File>
+        <File Id="Microsoft.Azure.Common.NetFramework.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)" ></File>  
         <!--Microsoft.WindowsAzure.Management.dll-->
         <File Id="Microsoft.WindowsAzure.Management.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)"></File>
         <!--Microsoft.WindowsAzure.Management.Compute.dll-->
@@ -420,8 +421,8 @@
         <File Id="PsAzure.DataCenterMigration.dll" Source="$(var.Azure.DataCenterMigration.TargetPath)"></File>
         <File Id="PsAzure.DataCenterMigration.Models.dll" Source="$(var.Azure.DataCenterMigration.Models.TargetPath)"></File>
         <File Id="PsMicrosoft.Threading.Tasks.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.Threading.Tasks.dll"></File>
-        <File Id="PsMicrosoft.WindowsAzure.Common.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.WindowsAzure.Common.dll"> </File>
-        <File Id="PsMicrosoft.WindowsAzure.Common.NetFramework.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.WindowsAzure.Common.NetFramework.dll"></File>
+        <File Id="PsMicrosoft.WindowsAzure.Common.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.Azure.Common.dll"> </File>
+        <File Id="PsMicrosoft.WindowsAzure.Common.NetFramework.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.Azure.Common.NetFramework.dll"></File>
         <File Id="PsMicrosoft.WindowsAzure.Management.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.WindowsAzure.Management.dll"></File>
         <File Id="PsMicrosoft.WindowsAzure.Management.Compute.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.WindowsAzure.Management.Compute.dll"></File>
         <File Id="PsMicrosoft.WindowsAzure.Management.Network.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.WindowsAzure.Management.Network.dll"></File>
@@ -433,6 +434,7 @@
         <File Id="PsMicrosoft.Data.OData.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.Data.OData.dll" ></File>
         <File Id="PsMicrosoft.Data.Services.Client.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\Microsoft.Data.Services.Client.dll" ></File>
         <File Id="PsSystem.Spatial.dll" Source="$(var.Azure.DataCenterMigration.App.TargetDir)\System.Spatial.dll" ></File>
+        <File Id="PsHyak.Common.dll" Source="$(var.Azure.DataCenterMigration.TargetDir)\Hyak.Common.dll"></File>
       </Component>
       <Component Id ="SQLPS" Guid="{4ffb0201-a53a-44a4-b46b-6bb068f347a2}" Win64="yes">
         <Condition>SQL_REQUIRED=1</Condition>

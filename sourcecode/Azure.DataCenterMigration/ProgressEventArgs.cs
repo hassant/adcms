@@ -31,7 +31,7 @@ namespace Azure.DataCenterMigration
         /// <summary>
         /// Constructor with message parameter
         /// </summary>
-        /// <param name="msg">Message to display on console</param>
+        /// <param name="msg"> Message to display on console</param>
         public ProgressEventArgs(string msg)
         {
             message = msg;

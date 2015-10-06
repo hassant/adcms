@@ -1,4 +1,5 @@
-﻿/*******************************************************************************
+﻿using Microsoft.WindowsAzure.Management.Compute.Models;
+/*******************************************************************************
  * Copyright 2014 Persistent Systems Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using Microsoft.WindowsAzure.Management.Compute.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Azure.DataCenterMigration.Models
 {
@@ -60,7 +56,7 @@ namespace Azure.DataCenterMigration.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// Reserved IP for the deplyment 
+        /// Reserved IP for the deployment 
         /// </summary>
         public string ReservedIPName { get; set; }
 
@@ -82,6 +78,7 @@ namespace Azure.DataCenterMigration.Models
             get
             {
                 return virtualMachines ?? (virtualMachines = new List<VirtualMachine>());
+
             }
             set
             {
@@ -94,8 +91,5 @@ namespace Azure.DataCenterMigration.Models
         /// </summary>
         public bool IsImported { get; set; }
         #endregion
-
-
-
     }
 }

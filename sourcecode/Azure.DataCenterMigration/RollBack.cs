@@ -14,23 +14,23 @@
  * limitations under the License.
  ******************************************************************************/
 using Azure.DataCenterMigration.Models;
-using Microsoft.WindowsAzure;
+using Hyak.Common;
+using Microsoft.Azure;
+//using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Management;
 using Microsoft.WindowsAzure.Management.Compute;
+using Microsoft.WindowsAzure.Management.Network;
+using Microsoft.WindowsAzure.Management.Network.Models;
+using Microsoft.WindowsAzure.Management.Storage;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections;
-using Microsoft.WindowsAzure.Management.Storage;
-using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.WindowsAzure.Management.Network;
-using Microsoft.WindowsAzure.Management.Network.Models;
-using log4net;
-using System.Diagnostics;
 
 namespace Azure.DataCenterMigration
 {
@@ -358,7 +358,7 @@ namespace Azure.DataCenterMigration
             }
             catch (CloudException ex)
             {
-                if (string.Compare(ex.ErrorCode, Constants.ResourceNotFound, StringComparison.CurrentCultureIgnoreCase) != 0)
+                if (string.Compare(ex.Error.ToString(), Constants.ResourceNotFound, StringComparison.CurrentCultureIgnoreCase) != 0)
                 {
                     Logger.Error(methodName, ex, ResourceType.VirtualNetwork.ToString());
                 }
@@ -450,7 +450,7 @@ namespace Azure.DataCenterMigration
                 }
                 catch (CloudException cex)
                 {
-                    if (cex.ErrorCode == Constants.ResourceNotFound)
+                    if (cex.Error.ToString() == Constants.ResourceNotFound)
                     {
                         return null;
                     }

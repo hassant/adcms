@@ -18,7 +18,7 @@ using System;
 namespace Azure.DataCenterMigration
 {
     /// <summary>
-    /// Class to store common paramters value for Export/Import functionality.
+    /// Class to store common parameters value for Export/Import functionality.
     /// </summary>
     internal class BaseParameters
     {

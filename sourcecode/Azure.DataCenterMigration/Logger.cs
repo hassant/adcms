@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 using log4net;
 using System;
 
@@ -24,6 +25,7 @@ namespace Azure.DataCenterMigration
     public static class Logger
     {
         private static Object thisLockLogger = new Object();
+
         static Logger()
         {
             LogSetup();
@@ -37,7 +39,7 @@ namespace Azure.DataCenterMigration
         }
        
         /// <summary>
-        /// Sets value for ResourceType and ResourceName properties in lof file
+        /// Sets value for ResourceType and ResourceName properties in log file
         /// </summary>
         /// <param name="log">Logger object</param>
         /// <param name="resourceType">Type of resource</param>
@@ -106,7 +108,7 @@ namespace Azure.DataCenterMigration
         /// Logs Warnings with exceptions in log file
         /// </summary>
         /// <param name="methodName">Method name</param>
-        /// <param name="message">Waring message to be logged</param>
+        /// <param name="message">warning message to be logged</param>
         /// <param name="ex">Exception</param>
         /// <param name="resourceType">Type of resource</param>
         /// <param name="resourceName">Name of resource</param>

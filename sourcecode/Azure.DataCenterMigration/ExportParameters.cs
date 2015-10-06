@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using System;
 namespace Azure.DataCenterMigration
 {
     /// <summary>
-    /// Class to store input paramters value for Export functionality.
+    /// Class to store input parameters value for Export functionality.
     /// </summary>
     internal class ExportParameters : BaseParameters
     {   
@@ -26,5 +25,6 @@ namespace Azure.DataCenterMigration
         internal PublishSetting SourceSubscriptionSettings { get; set; }
         internal bool GenerateMapperXml { get; set; }
         internal string DestinationPrefixName { get; set; }     
+        internal string MigrateDeallocatedVms { get; set; }
     }    
 }

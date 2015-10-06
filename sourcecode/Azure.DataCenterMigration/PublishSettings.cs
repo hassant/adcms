@@ -1,4 +1,5 @@
-﻿/*******************************************************************************
+﻿using Microsoft.Azure;
+/*******************************************************************************
  * Copyright 2014 Persistent Systems Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using Microsoft.WindowsAzure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace Azure.DataCenterMigration
@@ -50,14 +49,14 @@ namespace Azure.DataCenterMigration
     }
 
     /// <summary>
-    /// Class retrives information from PublishSettingsFilePath and stores into <see cref="PublishSetting"/>
+    /// Class retrieves information from PublishSettingsFilePath and stores into <see cref="PublishSetting"/>
     /// </summary>
     internal class PublishSettings
     {
         /// <summary>
         /// Constructor class
         /// </summary>
-        /// <param name="fileContents">Content of Publish Settings file</param>
+        /// <param name="fileContents"> Content of Publish Settings file</param>
         public PublishSettings(string fileContents)
         {
             var document = XDocument.Parse(fileContents);

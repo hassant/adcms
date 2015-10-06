@@ -38,6 +38,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Azure.DataCenterMigration",
 	EndProjectSection
 EndProject
 Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 7
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://psl-tfsapp:8080/tfs/pune_pg
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Azure.DataCenterMigration.Models\\Azure.DataCenterMigration.Models.csproj
+		SccProjectName1 = Azure.DataCenterMigration.Models
+		SccLocalPath1 = Azure.DataCenterMigration.Models
+		SccProjectUniqueName2 = Azure.DataCenterMigration\\Azure.DataCenterMigration.csproj
+		SccProjectName2 = Azure.DataCenterMigration
+		SccLocalPath2 = Azure.DataCenterMigration
+		SccProjectUniqueName3 = Azure.DataCenterMigration.App\\Azure.DataCenterMigration.App.csproj
+		SccProjectName3 = Azure.DataCenterMigration.App
+		SccLocalPath3 = Azure.DataCenterMigration.App
+		SccProjectUniqueName4 = Azure.DataCenterMigration.DatabaseLogSetup\\Azure.DataCenterMigration.DatabaseLogSetup.csproj
+		SccProjectTopLevelParentUniqueName4 = Azure.DataCenterMigration.sln
+		SccProjectName4 = Azure.DataCenterMigration.DatabaseLogSetup
+		SccLocalPath4 = Azure.DataCenterMigration.DatabaseLogSetup
+		SccProjectUniqueName5 = Azure.DataCenterMigration.VerifySQLConnection\\Azure.DataCenterMigration.VerifySQLConnection.csproj
+		SccProjectTopLevelParentUniqueName5 = Azure.DataCenterMigration.sln
+		SccProjectName5 = Azure.DataCenterMigration.VerifySQLConnection
+		SccLocalPath5 = Azure.DataCenterMigration.VerifySQLConnection
+		SccProjectUniqueName6 = Azure.DataCenterMigration.x64Installer\\Azure.DataCenterMigration.x64Installer.wixproj
+		SccProjectTopLevelParentUniqueName6 = Azure.DataCenterMigration.sln
+		SccProjectName6 = Azure.DataCenterMigration.x64Installer
+		SccLocalPath6 = Azure.DataCenterMigration.x64Installer
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms

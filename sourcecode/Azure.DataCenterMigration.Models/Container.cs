@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--
-/*******************************************************************************
+﻿/*******************************************************************************
  * Copyright 2014 Persistent Systems Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
--->
-<packages>
-  <package id="log4net" version="2.0.3" targetFramework="net45" />
-  <package id="Microsoft.Bcl" version="1.1.10" targetFramework="net45" />
-  <package id="Microsoft.Bcl.Build" version="1.0.21" targetFramework="net45" />
-</packages>
+using System.Collections.Generic;
+
+namespace Azure.DataCenterMigration.Models
+{
+    /// <summary>
+    /// Model for class container
+    /// </summary>
+    public class Container
+    {
+        #region Properties
+        /// <summary>
+        /// Storage Container name
+        /// </summary>
+        public string ContainerName { get; set; }
+        /// <summary>
+        /// List of blobs inside the storage container
+        /// </summary>
+        public List<Blob> BlobDetails { get; set; }
+
+        #endregion
+    }
+}

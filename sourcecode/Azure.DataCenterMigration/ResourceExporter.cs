@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 using Azure.DataCenterMigration.Models;
-using log4net;
-using Microsoft.WindowsAzure;
+using Hyak.Common;
+using Microsoft.Azure;
 using Microsoft.WindowsAzure.Management;
 using Microsoft.WindowsAzure.Management.Compute;
 using Microsoft.WindowsAzure.Management.Compute.Models;
@@ -24,13 +24,11 @@ using Microsoft.WindowsAzure.Management.Network;
 using Microsoft.WindowsAzure.Management.Network.Models;
 using Microsoft.WindowsAzure.Management.Storage;
 using Microsoft.WindowsAzure.Management.Storage.Models;
-using Polenter.Serialization;
+using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace Azure.DataCenterMigration
@@ -44,7 +42,6 @@ namespace Azure.DataCenterMigration
 
         private ExportParameters exportParameters;
         private DCMigrationManager dcMigration;
-
 
         #endregion
 
@@ -187,7 +184,7 @@ namespace Azure.DataCenterMigration
                         catch (CloudException ex)
                         {
                             deployment = null;
-                            if (string.Compare(ex.ErrorCode, Constants.ResourceNotFound) != 0)
+                            if (string.Compare(ex.Error.ToString(), Constants.ResourceNotFound) != 0)
                             {
                                 Logger.Error(methodName, ex, ResourceType.CloudService.ToString(), service.ServiceName);
                                 throw;
@@ -195,8 +192,8 @@ namespace Azure.DataCenterMigration
                         }
                         finally
                         {
-                            // Create CloudService object if cloud service exist in SourceDCName location.
-                            // Or create when service exist in affinity group and affinity group location matches with SourceDName.
+                            //// Create CloudService object if cloud service exist in SourceDCName location.
+                            ////Or create when service exist in affinity group and affinity group location matches with SourceDName.
 
                             var deploymentDetails = deployment != null ? ExportDeployment(service.ServiceName, deployment) : null;
 
@@ -212,6 +209,7 @@ namespace Azure.DataCenterMigration
                     }
                 }
             }
+
             Logger.Info(methodName, ProgressResources.ExecutionCompleted, ResourceType.CloudService.ToString());
             return cloudServices;
         }
@@ -237,8 +235,10 @@ namespace Azure.DataCenterMigration
                      select new Azure.DataCenterMigration.Models.StorageAccount
                      {
                          IsImported = false,
-                         StorageAccountDetails = account
+                         StorageAccountDetails = account,
+                         Containers = ExportStorageAccountContainers(account)
                      }
+
                     ).ToList();
                 Logger.Info(methodName, ProgressResources.ExportStorageAccountCompleted, ResourceType.StorageAccount.ToString());
                 return storageAccountsInDC;
@@ -251,10 +251,101 @@ namespace Azure.DataCenterMigration
         }
 
         /// <summary>
+        /// Exports the list of containers in a given storage account
+        /// </summary>
+        /// <param name="account">Storage account to get the name and key of the storage account whose blobs are to be exported</param>
+        /// <returns>List of storage account containers</returns>
+        private List<Container> ExportStorageAccountContainers(Microsoft.WindowsAzure.Management.Storage.Models.StorageAccount account)
+        {
+            string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+            List<Container> containers = new List<Container>();
+            try
+            {
+                string srcStorageAccountKey = GetStorageAccountKeysFromMSAzure(exportParameters.SourceSubscriptionSettings.Credentials, account.Name).PrimaryKey;
+
+                Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount =
+                           new Microsoft.WindowsAzure.Storage.CloudStorageAccount(
+                               new Microsoft.WindowsAzure.Storage.Auth.StorageCredentials(account.Name, srcStorageAccountKey), true);
+                CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
+
+                foreach (var item in cloudBlobClient.ListContainers())
+                {
+
+                    List<Blob> blobs = new List<Blob>();
+                    containers.Add(new Container
+                    {
+                        ContainerName = item.Name,
+                        BlobDetails = ExportBlobs(item.ListBlobs(null, false), blobs)
+                    });
+                }
+
+                return containers;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(methodName, ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of blobs and their details inside a given container
+        /// </summary>
+        /// <param name="blobList">List of all the blobs inside a given container</param>
+        /// <param name="blobs">Empty list to fill in the blob details</param>
+        /// <returns>List of Blobs with details present within a given container</returns>
+        private List<Blob> ExportBlobs(IEnumerable<IListBlobItem> blobList, List<Blob> blobs)
+        {
+            string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+            try
+            {
+                ////Loop thorugh to get the list of block blobs
+                foreach (var item in blobList.Where((blobItem, type) => blobItem is CloudBlockBlob))
+                {
+                    blobs.Add(new Azure.DataCenterMigration.Models.Blob
+                    {
+                        BlobName = ((CloudBlockBlob)(item)).Name,
+                        BlobURI = item.Uri,
+                        BlobType = BlobType.BlockBlob.ToString(),
+                        ContentType = ((CloudBlockBlob)(item)).Properties.ContentType,
+                        IsImported = false,
+                        IsExcluded = false
+
+                    });
+                }
+                ////Loop thorugh to get the list of page blobs
+                foreach (var item in blobList.Where((blobItem, type) => blobItem is CloudPageBlob))
+                {
+                    blobs.Add(new Azure.DataCenterMigration.Models.Blob
+                    {
+                        BlobName = ((CloudPageBlob)(item)).Name,
+                        BlobURI = item.Uri,
+                        BlobType = BlobType.PageBlob.ToString(),
+                        ContentType = ((CloudPageBlob)(item)).Properties.ContentType,
+                        IsImported = false
+                    });
+                }
+                //// List all additional subdirectories in the current directory, and call recursively:
+                foreach (var item in blobList.Where((blobItem, type) => blobItem is CloudBlobDirectory))
+                {
+                    var directory = item as CloudBlobDirectory;
+                    this.ExportBlobs(directory.ListBlobs(), blobs);
+                }
+
+                return blobs;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(methodName, ex);
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Exports service specific deployment details.
         /// </summary>
         /// <param name="serviceName">CloudService name</param>
-        /// <param name="deploymentResponse">Deployment response recieved from Microsoft Azure API</param>
+        /// <param name="deploymentResponse">Deployment response received from Microsoft Azure API</param>
         /// <returns>Cloud service specific deployment details</returns>
         private Deployment ExportDeployment(string serviceName, DeploymentGetResponse deploymentResponse)
         {
@@ -272,7 +363,7 @@ namespace Azure.DataCenterMigration
                     ReservedIPName = deploymentResponse.ReservedIPName,
                     VirtualIPAddresses = deploymentResponse.VirtualIPAddresses,
                     VirtualNetworkName = deploymentResponse.VirtualNetworkName,
-                    // Export Virtual Machines
+                    //// Export Virtual Machines
                     VirtualMachines = ExportVirtualMachines(serviceName, deploymentResponse),
                     IsImported = false
                 };
@@ -299,6 +390,24 @@ namespace Azure.DataCenterMigration
             try
             {
                 List<VirtualMachine> virtualMachines = new List<VirtualMachine>();
+
+                ////Associated with the Task ID:3201
+                ////Option to choose whether Deallocated Virtual machines migrate or not
+                ////Checking the DIP is null or not
+                if (exportParameters.MigrateDeallocatedVms == "No")
+                {
+                    // Retrieve roles information for PersistentVMRole type.
+                    virtualMachines = (from role in deployment.Roles
+                                       from roleInstance in deployment.RoleInstances
+                                       where role.RoleType == Constants.PersistentVMRole && role.RoleName == roleInstance.RoleName && roleInstance.IPAddress != null
+                                       select new VirtualMachine
+                                       {
+                                           VirtualMachineDetails = role,
+                                           IsImported = false,
+                                       }).ToList();
+                }
+                else
+                {
                 // Retrieve roles information for PersistentVMRole type.
                 virtualMachines = (from role in deployment.Roles
                                    where role.RoleType == Constants.PersistentVMRole
@@ -307,6 +416,16 @@ namespace Azure.DataCenterMigration
                                        VirtualMachineDetails = role,
                                        IsImported = false,
                                    }).ToList();
+                }
+
+                ////Associated with the Task ID:3195.
+                ////To relosve Bug #6 i.e.VM from Custom image
+                ////Loop through virtualMachines and set VMImagename=null to all VMs.
+                foreach (var virtualmachine in virtualMachines)
+                {
+                    virtualmachine.VirtualMachineDetails.VMImageName = null;
+                }
+                ////end
 
                 Logger.Info(methodName, string.Format(ProgressResources.ExportVirtualMachineCompleted, serviceName), ResourceType.VirtualMachine.ToString());
                 return virtualMachines;
@@ -319,10 +438,10 @@ namespace Azure.DataCenterMigration
         }
 
         /// <summary>
-        /// Exports Vnetconfig data from Source Subscription. Serialises the exported configurations into NetworkConfiguration class
+        /// Exports Vnetconfig data from Source Subscription. Serializes the exported configurations into NetworkConfiguration class
         /// </summary>
         /// <param name="configuration">The network configuration for subscription</param>
-        /// <param name="affinityGroupNames"> </param>
+        /// <param name="affinityGroupNames">List of affinity group</param>
         /// <returns>Network configurations </returns>
         private NetworkConfiguration ExportVNetConfiguration(NetworkGetConfigurationResponse configuration, List<string> affinityGroupNames)
         {
@@ -334,15 +453,25 @@ namespace Azure.DataCenterMigration
                 {
                     return null;
                 }
+                
                 var reader = new StringReader(configuration.Configuration);
                 var serializer = new XmlSerializer(typeof(NetworkConfiguration));
                 NetworkConfiguration netConfiguration = (NetworkConfiguration)serializer.Deserialize(reader);
 
-                if (netConfiguration.VirtualNetworkConfiguration != null && netConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites != null)
+                ////Check condition for any virtual network is available or not
+                ////Issue Work item:3865
+                if (netConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites == null)
+                {
+                    return null;
+                }
+
+                if (netConfiguration.VirtualNetworkConfiguration != null  && netConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites != null)
                 {
                     // Filter the virtaul networks - Find the networks for which we have considered affinity groups
-                    var requiredVirtualNetworkSites = (netConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites.
-                        Where(vn => affinityGroupNames.Contains(vn.AffinityGroup) || string.Compare(vn.Location, exportParameters.SourceDCName, StringComparison.CurrentCultureIgnoreCase) == 0)).ToArray();
+                    var requiredVirtualNetworkSites =                        
+                        (netConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites.
+                        Where(vn => affinityGroupNames.Contains(vn.AffinityGroup) ||
+                            string.Compare(vn.Location, exportParameters.SourceDCName, StringComparison.CurrentCultureIgnoreCase) == 0)).ToArray();
 
                     List<string> dnsNames = new List<string>();
                     List<string> localNetNames = new List<string>();
@@ -352,6 +481,7 @@ namespace Azure.DataCenterMigration
                         {
                             dnsNames.AddRange(vns.DnsServersRef.Select(dns => dns.name).ToList());
                         }
+
                         if (vns.Gateway != null && vns.Gateway.ConnectionsToLocalNetwork != null && vns.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef != null)
                         {
                             localNetNames.Add(vns.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef.name);
@@ -361,22 +491,23 @@ namespace Azure.DataCenterMigration
                     if (netConfiguration.VirtualNetworkConfiguration.Dns != null &&
                         netConfiguration.VirtualNetworkConfiguration.Dns.DnsServers != null)
                     {
-                        //Remove DnsServers which are not related to required virtual networks
+                        ////Remove DnsServers which are not related to required virtual networks
                         netConfiguration.VirtualNetworkConfiguration.Dns.DnsServers =
                             netConfiguration.VirtualNetworkConfiguration.Dns.DnsServers.Where(dns => dnsNames.Distinct().Contains(dns.name)).ToArray();
                     }
 
                     if (netConfiguration.VirtualNetworkConfiguration.LocalNetworkSites != null)
                     {
-                        //Remove LocalNetworks which are not related to required virtual networks
+                        ////Remove LocalNetworks which are not related to required virtual networks
                         netConfiguration.VirtualNetworkConfiguration.LocalNetworkSites =
                             netConfiguration.VirtualNetworkConfiguration.LocalNetworkSites.Where(lns => localNetNames.Distinct().Contains(lns.name)).ToArray();
                     }
-                    //Set VirtualNetworkSites
+                    ////Set VirtualNetworkSites
                     netConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites = requiredVirtualNetworkSites;
 
                     Logger.Info(methodName, ProgressResources.ExportVNetConfigurationCompleted, ResourceType.VirtualNetwork.ToString());
                 }
+
                 return netConfiguration;
             }
             catch (Exception ex)
@@ -386,7 +517,21 @@ namespace Azure.DataCenterMigration
             }
         }
 
-
+        private StorageAccountGetKeysResponse GetStorageAccountKeysFromMSAzure(SubscriptionCloudCredentials credentials, string storageAccountName)
+        {
+            string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+            using (var client = new StorageManagementClient(credentials))
+            {
+                Logger.Info(methodName, string.Format(ProgressResources.GetStorageAccountKeysStarted, storageAccountName),ResourceType.StorageAccount.ToString(),storageAccountName);
+                ////Call management API to get keys of storage account.
+                StorageAccountGetKeysResponse storageKeyResponse = Retry.RetryOperation(() => client.StorageAccounts.GetKeys(storageAccountName),
+                    (BaseParameters)exportParameters,
+                    ResourceType.StorageAccount, storageAccountName);
+                Logger.Info(methodName, string.Format(ProgressResources.GetStorageAccountKeysCompleted, storageAccountName),
+                ResourceType.StorageAccount.ToString(), storageAccountName);
+                return storageKeyResponse;
+            }
+        }
 
         #endregion
 
@@ -395,6 +540,8 @@ namespace Azure.DataCenterMigration
         /// <summary>        
         /// Gets list of hosted service operation response from MS azure using API call.        
         /// </summary>
+        /// <param name="credentials">credentials</param>
+        /// <param name="serviceUrl">serviceUrl</param>
         /// <returns>List of hosted service operation response for subscription </returns>
         private HostedServiceListResponse GetCloudServiceListResponseFromMSAzure(SubscriptionCloudCredentials credentials, Uri serviceUrl)
         {
@@ -405,8 +552,8 @@ namespace Azure.DataCenterMigration
             {
                 using (var client = new ComputeManagementClient(credentials, serviceUrl))
                 {
-                    // Call management API to get list of CloudServices.
-                    //HostedServiceListResponse serviceResponse = Retry.RetryOperation(() => client.HostedServices.List(), exportParameters.RetryCount, exportParameters.MinBackOff, exportParameters.MaxBackOff, exportParameters.DeltaBackOff, ResourceType.CloudService);
+                    ////Call management API to get list of CloudServices.
+                    ////HostedServiceListResponse serviceResponse = Retry.RetryOperation(() => client.HostedServices.List(), exportParameters.RetryCount, exportParameters.MinBackOff, exportParameters.MaxBackOff, exportParameters.DeltaBackOff, ResourceType.CloudService);
                     HostedServiceListResponse serviceResponse = Retry.RetryOperation(() => client.HostedServices.List(),
                        (BaseParameters)exportParameters,
                         ResourceType.CloudService);
@@ -424,6 +571,7 @@ namespace Azure.DataCenterMigration
         /// <summary>
         /// Gets list of affinity group operation response from MS azure using API call.
         /// </summary>
+        /// <param name="credentials">credentials</param>
         /// <returns>List of affinity group operation response for subscription </returns>
         private AffinityGroupListResponse GetAffinityGroupListResponseFromMSAzure(SubscriptionCloudCredentials credentials)
         {
@@ -434,10 +582,9 @@ namespace Azure.DataCenterMigration
             {
                 using (var client = new ManagementClient(credentials))
                 {
-                    // Call management API to get list of affinity groups.
+                    //// Call management API to get list of affinity groups.
 
-                    AffinityGroupListResponse agResponse = Retry.RetryOperation(() => client.AffinityGroups.List(),
-                       (BaseParameters)exportParameters, ResourceType.AffinityGroup);
+                    AffinityGroupListResponse agResponse = Retry.RetryOperation(() => client.AffinityGroups.List(),(BaseParameters)exportParameters,ResourceType.AffinityGroup);
                     Logger.Info(methodName, ProgressResources.GetAffinityGroupsFromMSAzureCompleted, ResourceType.AffinityGroup.ToString());
                     return agResponse;
                 }
@@ -451,6 +598,7 @@ namespace Azure.DataCenterMigration
 
         /// <summary>
         /// Gets network configuration from MS azure using management API call.
+        /// Changed in v2.0
         /// </summary>
         /// <param name="credentials">Source subscription credentials</param>
         /// <param name="serviceUrl">Subscription service Url</param>
@@ -460,17 +608,24 @@ namespace Azure.DataCenterMigration
             string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
             Logger.Info(methodName, ProgressResources.GetVirtualNetworkConfigFromMSAzureStarted, ResourceType.VirtualNetwork.ToString());
             dcMigration.ReportProgress(ProgressResources.GetVirtualNetworkConfigFromMSAzureStarted);
+            NetworkGetConfigurationResponse ventConfig = null;
+
             using (var vnetClient = new NetworkManagementClient(credentials, serviceUrl))
             {
                 try
                 {
-                    NetworkGetConfigurationResponse ventConfig = vnetClient.Networks.GetConfiguration();
+                    ventConfig = vnetClient.Networks.GetConfiguration();
                     Logger.Info(methodName, ProgressResources.GetVirtualNetworkConfigFromMSAzureCompleted, ResourceType.VirtualNetwork.ToString());
                     return ventConfig;
                 }
                 catch (CloudException cex)
                 {
-                    if (string.Compare(cex.ErrorCode, Constants.ResourceNotFound, StringComparison.CurrentCultureIgnoreCase) == 0)
+                    if (ventConfig == null)
+                    {
+                        return ventConfig;
+                    }
+
+                    if (string.Compare(cex.Error.ToString(), Constants.ResourceNotFound, StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         return null;
                     }
@@ -480,7 +635,6 @@ namespace Azure.DataCenterMigration
                         throw;
                     }
                 }
-
             }
         }
 
@@ -499,8 +653,7 @@ namespace Azure.DataCenterMigration
                 using (var client = new StorageManagementClient(credentials))
                 {
                     // Call management API to get list of storage accounts.
-                    StorageAccountListResponse storageResponse = Retry.RetryOperation(() => client.StorageAccounts.List(),
-                        (BaseParameters)exportParameters, ResourceType.StorageAccount);
+                    StorageAccountListResponse storageResponse = Retry.RetryOperation(() => client.StorageAccounts.List(),(BaseParameters)exportParameters,ResourceType.StorageAccount);
                     Logger.Info(methodName, ProgressResources.GetStorageAccountsFromMSAzureCompleted, ResourceType.StorageAccount.ToString());
                     return storageResponse;
                 }
@@ -513,5 +666,4 @@ namespace Azure.DataCenterMigration
         }
         #endregion
     }
-
 }

@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using Azure.DataCenterMigration;
-using log4net;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace Azure.DataCenterMigration.App

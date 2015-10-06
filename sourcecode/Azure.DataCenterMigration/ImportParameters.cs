@@ -13,21 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using System;
 namespace Azure.DataCenterMigration
 {
     /// <summary>
-    /// Class to store input paramters value for Import functionality.
+    /// Class to store input parameters value for Import functionality.
     /// </summary>
     internal class ImportParameters : BaseParameters
     {        
         public string DestinationDCName { get; set; }
+
         public string ImportMetadataFilePath { get; set; }
+
         public string MapperXmlFilePath { get; set; }
+
         public string DestinationPrefixName { get; set; }
+
         public bool RollBackOnFailure { get; set; }
+
         public bool ResumeImport { get; set; }
+
         public PublishSetting DestinationSubscriptionSettings { get; set; }
+
         public PublishSetting SourceSubscriptionSettings { get; set; }
     }
 }

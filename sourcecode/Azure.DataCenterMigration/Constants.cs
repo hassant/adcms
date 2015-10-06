@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-using System;
 using System.Collections.Generic;
 
 namespace Azure.DataCenterMigration
@@ -153,7 +152,6 @@ namespace Azure.DataCenterMigration
         /// Constant to store '{0}_ImportStatus.json' string.
         /// </summary>
         internal const string MetadataFileNewName = "{0}_ImportStatus.json";
-
 
         /// <summary>
         /// Constant to store '^[a-zA-Z]+[\-]?[a-zA-Z0-9]+$' pattern.
@@ -356,6 +354,11 @@ namespace Azure.DataCenterMigration
             /// Constant to store 'GenerateMapperXml' string.
             /// </summary>
             public const string GenerateMapperXml = "GenerateMapperXml";
+
+            /// <summary>
+            /// Constant to store 'MigrateDeallocatedVms' string.
+            /// </summary>
+            public const string MigrateDeallocatedVms = "MigrateDeallocatedVms";
             #endregion
 
             #region For Import / Migrate
@@ -447,7 +450,7 @@ namespace Azure.DataCenterMigration
         ///  Get maximum length allowed for resource type.
         /// </summary>
         /// <param name="resourceType"></param>
-        /// <returns>max lenth allowed for resource type. returns -1 if resource type doesnt match in resourceNameMaxLength dictionary</returns>
+        /// <returns>max length allowed for resource type. returns -1 if resource type doesn't match in resourceNameMaxLength dictionary</returns>
         internal static int GetMaxLengthForResourceType(ResourceType resourceType)
         {
             int maxLength;
@@ -456,7 +459,9 @@ namespace Azure.DataCenterMigration
                 return maxLength;
             }
             else
+            {
                 return -1;
+            }
         }
     }
 
@@ -480,7 +485,9 @@ namespace Azure.DataCenterMigration
         Blob,
         OSDisk,
         HardDisk,
-        None
-    };
+        None,
+        ////Assoicated with Tasl ID :3214
+        ExcludeVM
+    }
     #endregion
 }

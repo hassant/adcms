@@ -1,4 +1,6 @@
-﻿/*******************************************************************************
+﻿using Azure.DataCenterMigration.Models;
+using Newtonsoft.Json;
+/*******************************************************************************
  * Copyright 2014 Persistent Systems Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
-using Azure.DataCenterMigration.Models;
-using log4net;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Azure.DataCenterMigration
 {
@@ -75,6 +72,7 @@ namespace Azure.DataCenterMigration
                     Path.ChangeExtension(exportParameters.ExportMetadataFolderPath, Constants.MapperFileExtension),
                     resourceHelper.GenerateMapperXml(subscription, exportParameters.DestinationPrefixName));
             }
+
             ReportProgress(string.Format(ProgressResources.ExportMetadataCompleted, exportParameters.ExportMetadataFolderPath));
             Logger.Info(methodName, string.Format(ProgressResources.ExportMetadataCompleted, exportParameters.ExportMetadataFolderPath));
             Logger.Info(methodName, ProgressResources.ExecutionCompleted);
@@ -144,6 +142,7 @@ namespace Azure.DataCenterMigration
             {
                 quietMode = bool.TryParse(parameters[Constants.Parameters.QuietMode], out boolValue) ? boolValue : false;
             }
+
             ReportProgress(ProgressResources.ExportMetadataStarted);
             Logger.Info(methodName, ProgressResources.ExportMetadataStarted);
 

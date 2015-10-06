@@ -13,14 +13,10 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <WixCATargetsPath Condition=" '$(WixCATargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.CA.targets</WixCATargetsPath>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <SccProjectName>%24/MS_Investment/SourceCode/ADCMS Source Code/adcms-master/sourcecode/Azure.DataCenterMigration.VerifySQLConnection</SccProjectName>
+    <SccLocalPath>.</SccLocalPath>
+    <SccAuxPath>http://psl-tfsapp:8080/tfs/pune_pg</SccAuxPath>
+    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>

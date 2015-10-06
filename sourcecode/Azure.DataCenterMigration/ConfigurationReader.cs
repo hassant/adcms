@@ -1,4 +1,7 @@
-﻿/*******************************************************************************
+﻿using Microsoft.Azure;
+using Microsoft.WindowsAzure.Management;
+using Microsoft.WindowsAzure.Management.Models;
+/*******************************************************************************
  * Copyright 2014 Persistent Systems Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
-using Azure.DataCenterMigration.Models;
-using log4net;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using System.Xml.Linq;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Management;
-using Microsoft.WindowsAzure.Management.Models;
 
 namespace Azure.DataCenterMigration
 {
@@ -35,7 +30,7 @@ namespace Azure.DataCenterMigration
     internal static class ConfigurationReader
     {
         /// <summary>
-        /// Validates and converts input paramters into <see cref="ExportParameters"/> class.
+        /// Validates and converts input parameters into <see cref="ExportParameters"/> class.
         /// </summary>
         /// <param name="parameters">Collection of input parameters stored in key value pairs 
         /// <example> Operation "Export" SourceSubscriptionID "5d14d4a2-8c5a-4fc5-8d7d-86efb48b3a07" SourceDCName "East Asia" 
@@ -68,7 +63,7 @@ namespace Azure.DataCenterMigration
             if (!parameters.Keys.Contains(Constants.Parameters.SourceSubscriptionID))
             {
                 throw new ValidationException(string.Format(StringResources.MissingRequiredParameter,
-                    Constants.Parameters.SourceSubscriptionID, Constants.AppConfigArguments));
+                Constants.Parameters.SourceSubscriptionID, Constants.AppConfigArguments));
             }
 
             // SourceDCName
@@ -94,13 +89,13 @@ namespace Azure.DataCenterMigration
             {
                 throw new ValidationException(string.Format(StringResources.EmptyOrNullParameter, Constants.Parameters.ExportMetadataFolderPath));
             }
-            // SourceSubscriptionID
+            //// SourceSubscriptionID
             if (string.IsNullOrEmpty(parameters[Constants.Parameters.SourceSubscriptionID]))
             {
                 throw new ValidationException(string.Format(StringResources.EmptyOrNullParameter, Constants.Parameters.SourceSubscriptionID));
             }
 
-            // SourceDCName
+            //// SourceDCName
             if (string.IsNullOrEmpty(parameters[Constants.Parameters.SourceDCName]))
             {
                 throw new ValidationException(string.Format(StringResources.EmptyOrNullParameter, Constants.Parameters.SourceDCName));
@@ -236,9 +231,8 @@ namespace Azure.DataCenterMigration
                 };
             }
 
-
             List<string> locations = ExportDataCenterLocations(subscription.Credentials, retryCount, minBackOff, maxBackOff, deltaBackOff);
-            // Check whether SourceDc name exists in subscription
+            //// Check whether SourceDc name exists in subscription
             bool sourceLocationNamePresent = locations.Any((l => string.Compare(l, parameters[Constants.Parameters.SourceDCName],
                 StringComparison.CurrentCultureIgnoreCase) == 0));
 
@@ -266,12 +260,13 @@ namespace Azure.DataCenterMigration
                 GenerateMapperXml = generateMapperXmlValue,
                 DestinationPrefixName = parameters.Keys.Contains(Constants.Parameters.DestinationPrefixName) ?
                                         parameters[Constants.Parameters.DestinationPrefixName].ToLower() : Constants.DestinationPrefixValue,
+                MigrateDeallocatedVms = parameters[Constants.Parameters.MigrateDeallocatedVms]
             };
             return exportParams;
         }
 
         /// <summary>
-        /// Validates and converts input paramters into <see cref="ImportParameters"/> class.
+        /// Validates and converts input parameters into <see cref="ImportParameters"/> class.
         /// </summary>
         /// <param name="parameters">Collection of input parameters stored in key value pairs 
         /// <example> Operation "Import" SourceSubscriptionID "5d14d4a2-8c5a-4fc5-8d7d-86efb48b3a07" 
@@ -280,7 +275,7 @@ namespace Azure.DataCenterMigration
         /// DestinationPublishSettingsFilePath "D:\\PublishSettings.PublishSettings" 
         /// ImportMetadataFilePath "D:\\DataCenterMigration\mydata.json" DestinationPrefixName "dc" QuietMode "True" 
         /// RollBackOnFailure "True" ResumeImport "True" </example> </param>
-        /// <param name="validateForImport">True if the function will be called for imort functionality. 
+        /// <param name="validateForImport">True if the function will be called for import functionality. 
         /// False if it is called for Migrate functionality</param>
         /// <returns>Parameters required for import functionality</returns>
         internal static ImportParameters ValidateAndConvertImportParameters(IDictionary<string, string> parameters,
@@ -324,7 +319,7 @@ namespace Azure.DataCenterMigration
                     Constants.Parameters.DestinationDCName, Constants.AppConfigArguments));
             }
 
-            //DestinationPrefixName & MapperXmlFilePath.
+            ////DestinationPrefixName & MapperXmlFilePath.
             if (!validateForImport)
             {
                 if (!parameters.Keys.Contains(Constants.Parameters.DestinationPrefixName))
@@ -346,7 +341,7 @@ namespace Azure.DataCenterMigration
             #endregion
 
             #region Check for null or empty values
-            //SourcePublishSettingsFilePath            
+            ////SourcePublishSettingsFilePath            
             if ((parameters.ContainsKey(Constants.Parameters.SourcePublishSettingsFilePath) && string.IsNullOrEmpty(parameters[Constants.Parameters.SourcePublishSettingsFilePath]))
                   || (parameters.ContainsKey(Constants.Parameters.SourceCertificateThumbprint) && string.IsNullOrEmpty(parameters[Constants.Parameters.SourceCertificateThumbprint])))
             {
@@ -366,20 +361,20 @@ namespace Azure.DataCenterMigration
                 throw new ValidationException(string.Format(StringResources.EmptyOrNullParameter,
                     Constants.Parameters.ImportMetadataFilePath));
             }
-            // DestinationSubscriptionID
+            //// DestinationSubscriptionID
             if (string.IsNullOrEmpty(parameters[Constants.Parameters.DestinationSubscriptionID]))
             {
                 throw new ValidationException(string.Format(StringResources.EmptyOrNullParameter,
                     Constants.Parameters.DestinationSubscriptionID));
             }
 
-            // DestinationDCName
+            //// DestinationDCName
             if (string.IsNullOrEmpty(parameters[Constants.Parameters.DestinationDCName]))
             {
                 throw new ValidationException(string.Format(StringResources.EmptyOrNullParameter, Constants.Parameters.DestinationDCName));
             }
 
-            //DestinationPrefixName & MapperXmlFilePath.
+            ////DestinationPrefixName & MapperXmlFilePath.
             if (!validateForImport)
             {
                 if (string.IsNullOrEmpty(parameters[Constants.Parameters.DestinationPrefixName]))
@@ -421,7 +416,7 @@ namespace Azure.DataCenterMigration
 
             string importMapperXmlFilePath = string.Empty;
             string destinationPrefix = string.Empty;
-            // Validate MapperXmlFilePath if provided
+            //// Validate MapperXmlFilePath if provided
             if (validateForImport && parameters.ContainsKey(Constants.Parameters.MapperXmlFilePath))
             {
                 importMapperXmlFilePath = parameters[Constants.Parameters.MapperXmlFilePath];
@@ -687,7 +682,7 @@ namespace Azure.DataCenterMigration
         /// <summary>
         /// Exports list of SubscriptionId specific dataCenters.
         /// </summary>
-        ///<param name="credentials"> Subscription credentials</param>                
+        /// <param name="credentials"> Subscription credentials</param>                
         /// <param name="retryCount"> No. of times to retry in case of exception</param>
         /// <param name="minBackOff">Minimum backoff in seconds</param>
         /// <param name="maxBackOff">Maximum backoff in seconds</param>
@@ -760,4 +755,3 @@ namespace Azure.DataCenterMigration
         }
     }
 }
-
