@@ -19,6 +19,17 @@ You can migrate all of the following resources in the source data center:
 * Storage accounts 
 * Virtual machines (VMs)
 
+###Version 1.1 Feature List 
+With Azure Data Center Migration Solution version 1.1, along with the above features some new features have been added as listed below.
+* Option to Migrate Deallocated VMs
+* Migrate VM independent Blobs with option to exclude from migration.
+* Exclude VM from migration
+
+More details about the implementation can be found on User Guide
+
+###Version 1.1 Bug Fix
+*Bug Fix for the Error on Import creating Virtual Machine: BadRequest: No Disk should be specified for a Role if using a VMImage.
+
 ##User Guide
 Please refer to the [User Guide](/User%20Guide.docx?raw=true) for instructions on how the use the solution.
 It also describes the solution architecture and how the solution takes care of important considerations like atomicity, consistency and extensibity.
@@ -27,7 +38,7 @@ You can also take a look at [this video](/videos/adcms_v1.0_demo.mp4?raw=true) t
 ##Contributors
 
 ###Persistent Systems: 
-Satish Nikam, Maryann Fernandes, Shubhangi Pote, Neelam Sahu, Divya M
+Satish Nikam, Maryann Fernandes, Shubhangi Pote, Neelam Sahu, Divya M, Astrid Fernandes , Pooja Gupta, Shraddha Agarwal, Akhil Parrikar 
 
 ###Microsoft: 
 Rangarajan Srirangam, Guy Bowerman, Suren Machiraju, Yohirito Tada
